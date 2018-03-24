@@ -1,0 +1,92 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+### 1.1
+
+```{r}
+library(tidyverse)
+library(irr)
+```
+
+
+```{r}
+fleshka <- read_csv('https://github.com/agricolamz/2018_data_analysis_for_linguists/raw/master/data/students/Rezinka/hw2_agreement/hw2_1_zilo_class.csv')
+```
+
+```{r}
+fleshka %>%
+  distinct(stimulus,stimulus_source) %>%
+  count(stimulus_source)
+```
+
+### 1.2
+
+```{r}
+fleshka %>% 
+  select(s_id, stimulus, translation_ru, stimulus_source, class) %>% 
+  spread(key = s_id, value = class) ->
+  usb
+agree(usb[,-c(1:3)])
+```
+
+### 1.3
+
+```{r}
+kappa2(usb[,c(10,14)])
+```
+
+### 1.4
+```{r}
+kappam.fleiss(usb[,-c(1:3)])
+```
+
+### 1.5
+
+Процент полного согласия, составляющий 76,4%, показывает относительно высокое совпадение суждений носителей относительно принадлежности существительного к тому или иному классу. Значение каппы Коэна составляет 0.865. Такое значение показателя является высоким и попадает в категорию «almost perfect agreement» по [Landis, Koch 1977]. Значение каппы Фляйса сопоставимо со значением каппы Коэна и составляет 0.871. Это значение также попадает в категорию «almost perfect agreement» по [Landis, Koch 1977]. Таким образом, полученные в ходе анализа данные свидетельствует о низкой вариативности оценок респондентов относительно классовой принадлежности существительных. 
+
+### 2.1
+
+```{r}
+kruzhka <- read_csv('https://github.com/agricolamz/2018_data_analysis_for_linguists/raw/master/data/students/Rezinka/hw2_agreement/hw2_2_verbs.csv')
+```
+
+```{r}
+kruzhka %>%
+  distinct(SubjectCode) %>%
+  summarize(n=n())
+```
+
+### 2.2
+
+```{r}
+kruzhka %>%
+  group_by(Gender,WordType) %>%
+  summarize(mean=mean(GivenScore))
+```
+
+### 2.3
+
+```{r}
+kruzhka %>% 
+  select(SubjectCode, GivenScore, Stimulus, Prefix, WordType) %>% 
+  spread(key = SubjectCode, value = GivenScore) %>%
+  drop_na() ->
+  little_kruzhka
+```
+
+### 2.4
+
+```{r}
+kappam.fleiss(little_kruzhka[,-c(1:3)])
+```
+
+### 2.5
+
+```{r}
+icc(little_kruzhka[,-c(1:3)], model = "twoway", type = "agreement")
+```

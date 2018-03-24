@@ -1,0 +1,80 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+### 1.1
+
+```{r}
+library(MASS)
+library(tidyverse)
+library(ggplot2)
+library(ca)
+```
+
+```{r}
+rezinka <- read_csv('https://github.com/agricolamz/2018_data_analysis_for_linguists/raw/master/data/students/Rezinka/hw5_CA_MCA/hw5_chairs.csv')
+rezinka <- rezinka %>% mutate_if(is.character,as.factor)
+```
+
+```{r}
+MCA <- MASS::mca(rezinka[,-c(1:3)])
+```
+
+```{r}
+rezinka <- cbind(rezinka, MCA$rs)
+variables <- as_data_frame(MCA$cs)
+variables$var_names <- rownames(MCA$cs)
+rezinka %>% 
+  ggplot(aes(`1`, `2`))+
+  geom_point(aes(color = Category))+
+  stat_ellipse(aes(color = Category))+
+  geom_text(data = variables, aes(`1`, `2`, label = var_names))+
+  theme_bw() ->
+  paketik
+paketik
+```
+
+### 1.2
+
+Применив к данным Multiple Correspondence Analysis, мы получили следующие результаты. Как кажется, главный вывод, который можно сделать из графика состоит в том, что функциональная принадлежность у категории Stuhl шире, чем у категории Sessel. 
+
+Конкретные функциональные признаки, характерные для категории Stuhl находятся в лево-средней нижней и правой нижней частях графика. Это, в первую очередь, возможность регулировки спинки, возможность регулировки глубины посадки, предназначенность для работы, бумага в качестве материала для сидушки, возможность использования в качестве в функции стола.
+
+Конкретные функциональные признаки, характерные для категории Sessel располагаются в верхней средней части графика. Это, в первую очередь, глубокая посадка, предназначенность для отдыха и возможность использования в функции кровати.
+
+### 2.1
+
+```{r}
+fantik <- as.data.frame(read_csv('https://github.com/agricolamz/2018_data_analysis_for_linguists/raw/master/data/students/Rezinka/hw5_CA_MCA/hw5_colreg.csv'))
+```
+
+```{r}
+rownames(fantik) <- fantik$colors
+cca <- ca(fantik[-5])
+```
+
+```{r}
+fantik_col <- data.frame(cca$colcoord)
+fantik_col$rows <- rownames(cca$colcoord)
+
+fantik_row <- data.frame(cca$rowcoord)
+fantik_row$rows <- rownames(cca$rowcoord)
+
+fantik_col %>% 
+  ggplot(aes(Dim1, Dim2))+
+  geom_text(aes(label=rows),color = "blue")+
+  geom_text(data=fantik_row,aes(label=rows),color="red")+
+  theme_bw()
+```
+
+### 2.2
+
+Применив к данным об употреблении лексем, обозначающих различные цвета, в подкорпусах корпуса Современного Американского языка Correspondence Analysis, мы получили следующие результаты.
+
+На графике четко виде разброс между разными подкорпусами относительно частотности употребления в них лексем, обозначающих цвета. Реже всего обозначения цветов встречаются в академическом подкорпусе, чаще всего – в подкорпусе художественных текстов.
+
+Также можно отметить тенденции по частотности конкретных цветов в конкретных подкорпусах. Например, в разговорном подкорпусе, чаще чем в остальных, встречается лексема, обозначающая черный цвет. Реже встречаются обозначения белого. В газетном подкорпусе чаще всего встречаются обозначения двух базовых цветов – красного и зеленого. Подкорпус художественной литературы в этом смысле более разнообразен. В нем встречаются более экзотические цвета типа голубого, желтого, фиолетового, а также розового.
+
